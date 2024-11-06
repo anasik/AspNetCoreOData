@@ -15,8 +15,6 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
-  <Import Project="..\..\tool\build.props" />
-
   <ItemGroup>
     <None Remove=".editorconfig" />
     <AdditionalFiles Remove=".editorconfig" />
