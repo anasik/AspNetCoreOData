@@ -15,7 +15,7 @@ using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
-    internal class DefaultODataETagHandler : IETagHandler
+    public class DefaultODataETagHandler : IETagHandler
     {
         /// <summary>null literal that needs to be return in ETag value when the value is null</summary>
         private const string NullLiteralInETag = "null";
