@@ -1492,44 +1492,44 @@ public abstract partial class QueryBinder
         if (edmTypeReference != null && edmTypeReference.IsEnum())
         {
             constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
+        }
 
-            if (value != null)
+        if (value != null && edmTypeReference != null && edmTypeReference.IsEnum())
+        {
+            ODataEnumValue odataEnumValue = (ODataEnumValue)value;
+            string strValue = odataEnumValue.Value;
+            Contract.Assert(strValue != null);
+
+            IEdmEnumType enumType = edmTypeReference.AsEnum().EnumDefinition();
+            ClrEnumMemberAnnotation memberMapAnnotation = context.Model.GetClrEnumMemberAnnotation(enumType);
+            if (memberMapAnnotation != null)
             {
-                ODataEnumValue odataEnumValue = (ODataEnumValue)value;
-                string strValue = odataEnumValue.Value;
-                Contract.Assert(strValue != null);
-
-                IEdmEnumType enumType = edmTypeReference.AsEnum().EnumDefinition();
-                ClrEnumMemberAnnotation memberMapAnnotation = context.Model.GetClrEnumMemberAnnotation(enumType);
-                if (memberMapAnnotation != null)
+                IEdmEnumMember enumMember = enumType.Members.FirstOrDefault(m => m.Name == strValue);
+                if (enumMember == null)
                 {
-                    IEdmEnumMember enumMember = enumType.Members.FirstOrDefault(m => m.Name == strValue);
-                    if (enumMember == null)
-                    {
-                        enumMember = enumType.Members.FirstOrDefault(m => m.Value.ToString() == strValue);
-                    }
+                    enumMember = enumType.Members.FirstOrDefault(m => m.Value.ToString() == strValue);
+                }
 
-                    if (enumMember != null)
+                if (enumMember != null)
+                {
+                    Enum clrMember = memberMapAnnotation.GetClrEnumMember(enumMember);
+                    if (clrMember != null)
                     {
-                        Enum clrMember = memberMapAnnotation.GetClrEnumMember(enumMember);
-                        if (clrMember != null)
-                        {
-                            value = clrMember;
-                        }
-                        else
-                        {
-                            throw new ODataException(Error.Format(SRResources.CannotGetEnumClrMember, enumMember.Name));
-                        }
+                        value = clrMember;
                     }
                     else
                     {
-                        value = Enum.Parse(constantType, strValue);
+                        throw new ODataException(Error.Format(SRResources.CannotGetEnumClrMember, enumMember.Name));
                     }
                 }
                 else
                 {
                     value = Enum.Parse(constantType, strValue);
                 }
+            }
+            else
+            {
+                value = Enum.Parse(constantType, strValue);
             }
         }
 
