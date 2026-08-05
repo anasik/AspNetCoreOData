@@ -454,15 +454,17 @@ public class EnumsTest : WebApiTestBase<EnumsTest>
 
         string requestUri = "/convention/Employees?$filter=MaritalStatus in (null,'Married')&$format=application/json;odata.metadata=none";
 
-        HttpResponseMessage response = await client.GetAsync(requestUri);
-        Assert.True(response.IsSuccessStatusCode);
+        using(var response = await client.GetAsync(requestUri))
+        {
+            Assert.True(response.IsSuccessStatusCode);
 
-        var json = await response.Content.ReadAsObject<JObject>();
-        var value = json.GetValue("value") as JArray;
-        Assert.NotNull(value);
+            var json = await response.Content.ReadAsObject<JObject>();
+            var value = json.GetValue("value") as JArray;
+            Assert.NotNull(value);
 
-        var ids = value.Select(v => (int)v["ID"]).OrderBy(id => id).ToArray();
-        Assert.Equal(new[] { 1, 2 }, ids);
+            var ids = value.Select(v => (int)v["ID"]).OrderBy(id => id).ToArray();
+            Assert.Equal(new[] { 1, 2 }, ids);
+        }
     }
 
     [Theory]
